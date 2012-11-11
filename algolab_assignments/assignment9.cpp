@@ -1,43 +1,53 @@
+
+//Presenty the count is being counted multiple times.Correct that!
+
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
 #include <cmath>
 #include <climits>                        //required for the constants INT_MAX and INT_MIN
 #define MAX(x,y) ((x)>(y))?(x):(y)
-#define MAX_m 10000
-#define random (int(((double)rand()*100000 / (double)RAND_MAX)))/100000.0
+#define MAX_m 1200
+#define random (int(((float)rand()*100000 / (float)RAND_MAX)))/100000.0
+#define c1 1.5
+#define c2 1.1
+#define delta 0.0001
+#define ifNeighbour (((cell->x-xitem)*(cell->x-xitem)+(cell->y-yitem)*(cell->y-yitem)-neighbour_distance_sq)<delta)
 using namespace std;
 
 typedef struct points{
-	double x;
-	double y;
+	float x;
+	float y;
 }point;                                                      //stores the coordinates of a single point
 
 typedef struct hash_table{ 
-	double x,y;
+	float x,y;
 	struct hash_table *next;
 }hash_table;                                  //data structure for hash table
 
 typedef struct linked{
-	double x;
-	double y;
+	float x;
+	float y;
 	struct linked* next;
 }adjacency_list;
 
 typedef struct heap{
-	double x;
-	double y;
+	float x;
+	float y;
 	struct heap* parent;
 }min_heap;
+
 
 hash_table* H[MAX_m][MAX_m];       //hash table of size MAX_m
 
 void allocate(point* P,int n);             //fills P[] with random coordinates
 void create_hash_table(int n, int m, point* P);          //creates and fills hash tables with values
-void push_element_hash_table(int xh, int yh, double x, double y);      //push element required for inserting elements in hash tables
-int distance(point* P, int x, int y, double xitem, double yitem, int n);    //finds and return index of the nearest point from(xitem,yitem) in the (x,y) cell
+void push_element_hash_table(int xh, int yh, float x, float y);      //push element required for inserting elements in hash tables
 void search(point* P,int n, int m);   //responsible for initial and correct searching
 void initialise_adjacency_list(adjacency_list**, point*, int);      //initialises adjacency list by pushing the 1st member in the list
+void EMST(adjacency_list** list, point* P, int n);               //implements EMST
+int populateList(adjacency_list* list,point P,int n);               //populates the adjacency list with its neighbours
+bool insert_to_list(adjacency_list* list, float x, float y);      //returns number of element inserted
 
 int main()
 {
@@ -48,18 +58,124 @@ int main()
 	m = ceil(sqrt(n));
 	adjacency_list* list[n]; 
 	point P[n];
-	min_heap* pc_min_heap; 
 	allocate(P,n);                //allocating the points randomly in P array
 	initialise_adjacency_list(list, P, n);
 	create_hash_table(n,m,P);
-	kruskal_algorithm(pc_min_heap, list, P, n);
+	EMST(list, P, n); 
 	return 0;
 }
 
-void kruskal_algorithm(min_heap* pc_min_heap, adjacency_list** list, point* P, int n)
+void EMST(adjacency_list** list, point* P, int n)               //implements EMST
 {
+	//adding the edges
+	int i, count = 0;
+	for(i=0;i<n;i++)
+		count += populateList(list[i], P[i], n);       
+	
+	cout<<"1st phase of MST: " << count << endl;          
+	
 	
 }
+
+int populateList(adjacency_list* list,point P,int n)               //populates the adjacency list with its neighbours
+{
+
+	hash_table* cell;
+	float xitem = P.x, yitem = P.y, min_dist_sq = INT_MAX, neighbour_distance_sq = float(c1*c1)/n;
+	int m = ceil(sqrt(n)), xi = floor(xitem*m), yi = floor(yitem*m), x, y;    //xi,yi the index of xitem,yitem in hash table
+	int count = 0;
+
+	for(int r=0;r<=2;r++)
+	{
+		//keep x constant at xi+r while vary y from yi-r to yi+r
+		x = xi+r;
+		y = MAX(yi-r, 0);
+		while(x<=m && y<=yi+r)
+		{
+
+			cell = H[x][y];
+			while(cell!=NULL)
+			{
+				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+					count++;
+				
+				cell = cell->next;
+			}
+			y++;
+		}
+		cout<<count<<endl;
+		//keep x constant at xi-r while vary y from yi-r to yi+r
+		x = xi-r;
+		y = MAX(yi-r, 0);
+		while(x>=0 && y<=yi+r)
+		{
+			cell = H[x][y];
+			while(cell!=NULL)
+			{
+				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+					count++;				
+				cell = cell->next;
+			}
+			y++;
+		}
+		cout<<count<<endl;
+  		//keep y constant at yi+r while vary x from xi-r+1 to xi+r-1
+		y = yi+r;
+		x = MAX(xi-r+1, 0);
+		while(y<=m && x<=xi+r-1)
+		{
+			cell = H[x][y];
+			while(cell!=NULL)
+			{
+				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+					count++;
+				cell = cell->next;
+			}
+			x++;
+		}
+		cout<<count<<endl;
+		//keep y constant at yi-r while vary x from xi-r+1 to xi+r-1
+		y = yi-r;
+		x = MAX(xi-r+1, 0);
+		while(y>=m && x<=xi+r-1)
+		{
+			cell = H[x][y];
+			while(cell!=NULL)
+			{
+				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+					count++;
+				cell = cell->next;
+			}
+			x++;
+		}
+		cout<<count<<endl;
+	}
+	
+	return count;         
+		
+   
+}
+
+bool insert_to_list(adjacency_list* list, float x, float y)      //returns whether element inserted
+{
+	adjacency_list* copy = list;
+	int count = 0;
+	while(copy!=NULL)
+	{
+		if(abs(copy->x-x)<delta)
+			return false;
+		count++;
+		copy = copy->next;
+	}
+	
+	copy = (adjacency_list*)malloc(sizeof(adjacency_list));
+	copy->next = NULL;
+	copy->x = x;
+	copy->y = y;
+	return true;
+}
+
+//void kruskal_algorithm(min_heap* pc_min_heap, adjacency_list** list, point* P, int n)
 
 void initialise_adjacency_list(adjacency_list** list ,point* P, int n)
 {
@@ -71,129 +187,6 @@ void initialise_adjacency_list(adjacency_list** list ,point* P, int n)
 		list[i]->y = P[i].y;
 		list[i]->next = NULL;
 	}
-}
-
-void search(point* P,int n, int m) 
-{
-
-	double xitem = random, yitem = random, min_dist_sq = INT_MAX, delta = 0.00001;
-	int xi = floor(xitem*m), yi = floor(yitem*m), x, y;                  //finding the index of the search item in the hash table
-	int r=1;                                             //r represents the maximum distance from a point(circle of radius r)
-	int required_index = -1,index;
-	bool flag = false;
-	//cout<<xi<<" "<<yi<<endl;
-	cout<<"+++ Searching for point closest to: ("<<xitem<<", "<<yitem<<")\n";
-	index = distance(P, xi, yi, xitem, yitem, n);
-	if(index!=-1)
-		required_index = index;
-
-	if(required_index!=-1)
-	{
-		cout<<"\t\tInitial Search Gives: ("<<P[required_index].x<<", "<<P[required_index].y<<")\n";
-		flag = true;
-		required_index = -1;
-	}
-	min_dist_sq = INT_MAX;
-	
-	while(required_index == -1)
-	{
-		
-		//keeping x constant at xi+r while varying y from yi-r to yi+r
-		x = xi+r;
-		y = MAX(yi-r, 0);
-		min_dist_sq = double(INT_MAX);
-		while(x<m && y<=yi+r)
-		{
-
-			index = distance(P, x, y, xitem, yitem, n);
-			if(index!=-1 && (min_dist_sq-(P[index].x-xitem)*(P[index].x-xitem)-(P[index].y-yitem)*(P[index].y-yitem))>delta)
-			{
-				min_dist_sq = ((P[index].x-xitem)*(P[index].x-xitem)+(P[index].y-yitem)*(P[index].y-yitem));
-				required_index = index;
-			}
-			y++;
-		}
-	
-		//keeping x constant at xi-r while varying y from yi-r to yi+r
-		x = xi-r;
-		y = MAX(yi-r, 0);
-		while(y<=yi+r && x>=0)
-		{
-			index = distance(P, x, y, xitem, yitem, n);
-			if(index!=-1 && (min_dist_sq-(P[index].x-xitem)*(P[index].x-xitem)-(P[index].y-yitem)*(P[index].y-yitem))>delta)
-			{
-				min_dist_sq = ((P[index].x-xitem)*(P[index].x-xitem)+(P[index].y-yitem)*(P[index].y-yitem));
-				required_index = index;
-			}
-			y++;
-		}
-	
-		//keeping y constant at yi+r while varying x from xi-r to xi+r
-		y = yi+r;
-		x = MAX(xi-r, 0);
-		while(x<=xi+r && y<m)
-		{
-			index = distance(P, x, y, xitem, yitem, n);
-			if(index!=-1 && (min_dist_sq-(P[index].x-xitem)*(P[index].x-xitem)-(P[index].y-yitem)*(P[index].y-yitem))>delta)
-			{
-				min_dist_sq = ((P[index].x-xitem)*(P[index].x-xitem)+(P[index].y-yitem)*(P[index].y-yitem));
-				required_index = index;
-			}
-			x++;
-		}
-	
-		//keeping y constant at yi-r while varying x from xi-r to xi+r
-		y = yi-r;
-		x = MAX(xi-r, 0);
-		while(x<=xi+r && y>=0)
-		{
-			index = distance(P, x, y, xitem, yitem, n);
-			if(index!=-1 && (min_dist_sq-(P[index].x-xitem)*(P[index].x-xitem)-(P[index].y-yitem)*(P[index].y-yitem))>delta)
-			{
-				min_dist_sq = ((P[index].x-xitem)*(P[index].x-xitem)+(P[index].y-yitem)*(P[index].y-yitem));
-				required_index = index;
-			}
-			x++;
-		}
-		r++;
-	}
-	if(!flag)
-		cout<<"\t\tInitial Search Gives : ("<<P[required_index].x<<","<<P[required_index].y<<")\n";	
-	cout<<"\t\tThe correct result is: ("<<P[required_index].x<<" ,"<<P[required_index].y<<")\n";
-		
-   
-}
-
-int distance(point* P, int x, int y, double xitem, double yitem, int n)
-{
-	if(H[x][y]==NULL)
-		return -1;
-	
-	hash_table* pointer = H[x][y];
-	//cout<<x<<" "<<y<<" "<<H[x][y]->x<<" "<<pointer->x<<endl;
-	double min_dist = INT_MAX, distance_sq, minx = -2, miny = -2;
-	while(pointer != NULL && pointer->x!=-1)
-	{
-		distance_sq = (xitem-pointer->x)*(xitem-pointer->x)+(yitem-pointer->y)*(yitem-pointer->y);
-		if(min_dist-distance_sq>0.001)
-		{
-			min_dist = distance_sq;
-			minx = pointer->x;
-			miny = pointer->y;
-		}
-		pointer = pointer->next;
-	}
-	//cout<<minx<<" ksdfk "<<miny<<endl;
-	int i;
-	double delta = 0.00001;
-	for(i=0;i<n;i++)
-	{
-		
-		if(fabs(P[i].x-minx)<delta && fabs(P[i].y-miny)<delta)
-			return i;
-	}
-	return -1;
-
 }
 
 void create_hash_table(int n, int m, point* P)
@@ -231,7 +224,7 @@ void allocate(point* P,int n)
     }
 }
 
-void push_element_hash_table(int xh, int yh, double x, double y)
+void push_element_hash_table(int xh, int yh, float x, float y)
 {
 	hash_table* pointer = H[xh][yh];
 	while(pointer->next != NULL)
