@@ -32,11 +32,11 @@ typedef struct linked{
 }adjacency_list;
 
 typedef struct heap{
-	float x;
-	float y;
-	struct heap* parent;
-}min_heap;
-
+	float x1,y1;
+	float x2,y2;
+	float cost_sq;                   
+	struct heap* child;
+}min_heap;                                //contains edges connecting v1 and v2 and their cost.
 
 hash_table* H[MAX_m][MAX_m];       //hash table of size MAX_m
 
@@ -60,9 +60,58 @@ int main()
 	point P[n];
 	allocate(P,n);                //allocating the points randomly in P array
 	initialise_adjacency_list(list, P, n);
+	//cout<<"\n";
+	//for(int i=0;i<n;i++)
+	//	cout<<"("<<P[i].x<<","<<P[i].y<<") ,";
+	//cout<<"\n";
 	create_hash_table(n,m,P);
 	EMST(list, P, n); 
 	return 0;
+}
+
+
+void kruskal_algorithm(adjacency_list** result,adjacency_list** list, point* P, int nvertice)
+{
+	min_heap* root = NULL;
+	int i=0, root_node_x, root_node_y;
+	adjacency_list* temp;
+	//creation of min heap
+	while(i<n)
+	{
+		temp = list[i];
+		root_node_x = list[i]->x;
+		root_node_y = list[i]->y;
+		while(temp!=NULL)
+		{
+			cost_sq = (root_node_x-temp->x)*(root_node_x-temp->x)+(root_node_y-temp->y)*(root_node_y-temp->y);
+			insert_heap(root, cost_sq, list[i]->x ,list[i]->y, temp->x, temp->y); 
+			temp = temp->next;
+		}
+	}
+	min_heap* temp_heap;
+	vertice_count = nvertice;             //keeps the count of vertice in min heap.
+	while(vertice_count!=0)
+	{
+		temp_heap = root;
+		remove_from_heap(root);
+		if(cycleNotPresent(temp_heap, result))
+		{
+			for(i=0;i<n;i++)
+			{
+				if(abs(P[i].x-root->
+			}
+		}
+	}
+
+
+
+
+
+}
+
+void insert_heap(min_heap* heap, float cost_sq, float x1, float y1,float x2, float y2)
+{
+	
 }
 
 void EMST(adjacency_list** list, point* P, int n)               //implements EMST
@@ -72,29 +121,43 @@ void EMST(adjacency_list** list, point* P, int n)               //implements EMS
 	for(i=0;i<n;i++)
 		count += populateList(list[i], P[i], n);       
 	
-	cout<<"1st phase of MST: " << count << endl;          
-	
+	cout<<"1st phase of MST: " << count/2 << endl;                             //by 2 because each edge will be counted twice          
+
+	kruskal_algorithm(list, P, n);	
 	
 }
 
 int populateList(adjacency_list* list,point P,int n)               //populates the adjacency list with its neighbours
 {
-
+	//cout<<"\n\n\n";
 	hash_table* cell;
-	float xitem = P.x, yitem = P.y, min_dist_sq = INT_MAX, neighbour_distance_sq = float(c1*c1)/n;
+	float xitem = P.x, yitem = P.y, neighbour_distance_sq = float(c1*c1)/n;
 	int m = ceil(sqrt(n)), xi = floor(xitem*m), yi = floor(yitem*m), x, y;    //xi,yi the index of xitem,yitem in hash table
 	int count = 0;
 
-	for(int r=0;r<=2;r++)
+	//checking within the cell of xitem and yitem
+	x = xi;
+	y = yi;
+	cell = H[x][y];
+	while(cell->x!=-1)
+	{
+		if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+			count++;
+		cell = cell->next;
+	}
+	//cout<<"original: "<<count<<endl;
+
+
+	for(int r=1;r<=2;r++)
 	{
 		//keep x constant at xi+r while vary y from yi-r to yi+r
 		x = xi+r;
 		y = MAX(yi-r, 0);
-		while(x<=m && y<=yi+r)
+		while(x<m && y<=yi+r && y<m)
 		{
 
 			cell = H[x][y];
-			while(cell!=NULL)
+			while(cell->x!=-1)
 			{
 				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
 					count++;
@@ -103,14 +166,14 @@ int populateList(adjacency_list* list,point P,int n)               //populates t
 			}
 			y++;
 		}
-		cout<<count<<endl;
+        // cout<<count<<endl;
 		//keep x constant at xi-r while vary y from yi-r to yi+r
 		x = xi-r;
 		y = MAX(yi-r, 0);
-		while(x>=0 && y<=yi+r)
+		while(x>=0 && y<=yi+r && y<m)
 		{
 			cell = H[x][y];
-			while(cell!=NULL)
+			while(cell->x!=-1)
 			{
 				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
 					count++;				
@@ -118,14 +181,14 @@ int populateList(adjacency_list* list,point P,int n)               //populates t
 			}
 			y++;
 		}
-		cout<<count<<endl;
+		//cout<<count<<endl;
   		//keep y constant at yi+r while vary x from xi-r+1 to xi+r-1
 		y = yi+r;
 		x = MAX(xi-r+1, 0);
-		while(y<=m && x<=xi+r-1)
+		while(y<m && x<=xi+r-1 && x<m)
 		{
 			cell = H[x][y];
-			while(cell!=NULL)
+			while(cell->x!=-1)
 			{
 				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
 					count++;
@@ -133,14 +196,14 @@ int populateList(adjacency_list* list,point P,int n)               //populates t
 			}
 			x++;
 		}
-		cout<<count<<endl;
+		//cout<<count<<endl;
 		//keep y constant at yi-r while vary x from xi-r+1 to xi+r-1
 		y = yi-r;
 		x = MAX(xi-r+1, 0);
-		while(y>=m && x<=xi+r-1)
+		while(y>=0 && x<=xi+r-1 && x<m)
 		{
 			cell = H[x][y];
-			while(cell!=NULL)
+			while(cell->x!=-1)
 			{
 				if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
 					count++;
@@ -148,10 +211,10 @@ int populateList(adjacency_list* list,point P,int n)               //populates t
 			}
 			x++;
 		}
-		cout<<count<<endl;
+		//cout<<count<<endl;
 	}
 	
-	return count;         
+	return count;           
 		
    
 }
@@ -175,7 +238,6 @@ bool insert_to_list(adjacency_list* list, float x, float y)      //returns wheth
 	return true;
 }
 
-//void kruskal_algorithm(min_heap* pc_min_heap, adjacency_list** list, point* P, int n)
 
 void initialise_adjacency_list(adjacency_list** list ,point* P, int n)
 {
