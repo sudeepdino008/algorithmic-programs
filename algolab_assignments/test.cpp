@@ -3,13 +3,16 @@
 #include <cstdlib>
 #include <cmath>
 #include <climits>                        //required for the constants INT_MAX and INT_MIN
+#include <cstring>
 #define MAX(x,y) ((x)>(y))?(x):(y)
 #define random (int(((float)rand()*100000 / (float)RAND_MAX)))/100000.0
 #define c1 1.5
 #define c2 1.1
 #define delta 0.0001
 #define distance_sq(x1,y1,x2,y2) ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) 
+#define SWAP(x1,x2) temp=x1;x1=x2;x2=temp;
 using namespace std;
+
 
 typedef struct _node{ 
 	float x,y;
@@ -23,12 +26,22 @@ typedef struct linked{
 	float y;
 	struct linked* next;
 }adjacency_list;                       //adjacency list for storing graph
+typedef adjacency_list* ad_list;
 
+
+typedef struct {
+	float cost;
+	float x1,y1;
+	float x2,y2;
+}edge;
 
 hash fillHashTable(int n);
 void populateList(adjacency_list* list,node_pointer hash_table,hash H,int n);               //populates the adjacency list with its neighbours
-adjacency_list* insert_to_list(adjacency_list* list, float x, float y);      //returns whether element inserted
-
+adjacency_list* insert_to_list(adjacency_list* list, float x, float y);                     //returns whether element inserted
+//void BFS(ad_list * list, adjacency_list * origin,  int n);
+//void EMST(ad_list * list, int n);
+void kruskal(ad_list * list, int n);
+void bubble_sort(edge *E, int n);
 
 int main()
 {
@@ -59,13 +72,13 @@ int main()
 				temp =temp->next;
 				c++;
 			}
-			//if(temp==hash_table[i][j])
-			//	cout<<endl;
+			
 		}
 	}
 
-	c=0;
+	
 	//filling the adjacency list with edges
+	c=0;
 	for(i=0;i<m;i++)
 	{
 		for(j=0;j<m;j++)
@@ -82,7 +95,8 @@ int main()
 			//	cout<<endl;
 		}
 	}
-
+	
+	/*calculating number of edges before 1st phase EMST*/
 	c=0;
 	for(i=0;i<n;i++)
 	{
@@ -96,10 +110,62 @@ int main()
 		}
 		//cout<<endl;
 	}
-	cout<<"sk: "<<c<<endl;
-	
+	/************/
+	cout<<"NUmber of edges:"<<c<<endl;
+	kruskal(list, n);
 	return 0;
 } 
+
+void kruskal(ad_list * list, int n)
+{
+	edge E[1000];
+	adjacency_list *temp;
+	int c=0, i;
+	
+	for(i=0;i<n;i++)
+	{
+		//cout<<"hello";
+		temp = list[i];
+		while(temp!=NULL && temp->next!=NULL && int(temp->next->x)!=-1 && int(temp->next->y)!=-1)
+		{
+			E[c].x1 = list[i]->x;
+			E[c].y1 = list[i]->y;
+			E[c].y2 = temp->next->y;
+			E[c].x2 = temp->next->x;
+			E[c].cost = distance_sq(list[i]->x, list[i]->y, temp->next->x, temp->next->y);
+			c++;
+			temp = temp->next;
+		}
+	}
+	bubble_sort(E, n);
+		
+	
+	
+	
+	
+}
+
+
+int find_index(float startx, float starty, ad_list * list, int n)          	//figure out the index of startx, starty in the adjacency_list
+{
+/*we need to find the index in the list[] of the 1st element in queue, for this, we can calculate the index of that element in hash_table and then look around the index (j*m+i) in the list (average constant time)*/
+	int m = ceil(sqrt(n)), xh = floor(m*startx) ,yh = floor(m*starty), index = (yh*m+xh);
+	int k;
+	for(k=0;k<n;k++)
+	{
+		if(index-k>=0 && abs(list[index-k]->x-startx)<delta && abs(list[index-k]->y-starty)<delta)
+		{
+			index = index-k;
+			break;
+		}
+		else if(index+k<n && abs(list[index+k]->x-startx)<delta && abs(list[index+k]->y-starty)<delta)
+		{
+			index = index+k;
+			break;
+		} 
+	}
+	return index;
+}
 
 hash fillHashTable(int n)
 {
@@ -239,9 +305,8 @@ void populateList(adjacency_list* list,node_pointer hash_table,hash H,int n)    
 	
 	
 }
-		
    
-adjacency_list* insert_to_list(adjacency_list* list, float x, float y)      //returns whether element inserted
+adjacency_list * insert_to_list(adjacency_list* list, float x, float y)      //returns whether element inserted
 {
 	adjacency_list* copy = list;
 
@@ -270,4 +335,24 @@ adjacency_list* insert_to_list(adjacency_list* list, float x, float y)      //re
 	copy->next->y = y;
 	return list;
 }
-   
+
+
+void bubble_sort(edge *E, int n)
+{
+	int i,j;
+	float temp;
+	for(i=0;i<n;i++)
+	{
+		for(j=i+1;j<n;j++)
+		{
+			if(E[i].cost > E[j].cost)
+			{
+				SWAP(E[i].cost, E[j].cost);
+				SWAP(E[i].x1, E[j].x1);
+				SWAP(E[i].x2, E[j].x2);
+				SWAP(E[i].y1, E[j].y1);
+				SWAP(E[i].y2, E[j].y2);
+			}
+		}
+	}
+}

@@ -58,7 +58,6 @@ int main()
 
 void heapify(h *heap, long long int B)                      //heapify taking O(n) time.
 {
-
 	
     int j=1;
 	while(j<=B)

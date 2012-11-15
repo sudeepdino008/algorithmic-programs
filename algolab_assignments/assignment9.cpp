@@ -142,7 +142,9 @@ int populateList(adjacency_list* list,point P,int n)               //populates t
 	while(cell->x!=-1)
 	{
 		if(ifNeighbour && insert_to_list(list, cell->x, cell->y))
+		{
 			count++;
+			insert_to_list(list,cell->x, cell->y);
 		cell = cell->next;
 	}
 	//cout<<"original: "<<count<<endl;
