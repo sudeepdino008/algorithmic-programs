@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <sstream>
-#define PRIME 104729              //large prinme number for hashing
+#define PRIME 104729              //large prime number for hashing
 #define B 10              //Base of the numeral system used
 using namespace std;
 

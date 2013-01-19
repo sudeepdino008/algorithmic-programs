@@ -1,5 +1,5 @@
 #include <iostream>
-#include<cstring>
+#include <cstring>
 using namespace std;
 int longest_subsequence(string,string);
 int MIN(int ,int,int);

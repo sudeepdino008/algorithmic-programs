@@ -1,0 +1,45 @@
+#include <iostream>
+#include <algorithm>
+#define cti(ch) (ch-45)   //converts character to int
+#define itc(n) char(n+45)    //converts int to char
+using namespace std;
+
+string reverse(string s)
+{
+    reverse(s.begin(), s.end());
+    return s;
+}
+
+string next_palin(string s)
+{
+    int len = s.length(), i;
+    bool ifeven = (len%2)?(false):(true);
+    for(i=0;i<len/2;i++)
+    {
+        if(cti(s[0])>cti(s[len-i-1]))
+        {
+            if(ifeven)
+                return (s.substr(0,len/2)+reverse(s.substr(0,len/2)));
+            else
+                return (s.substr(0,len/2+1)+reverse(s.substr(0,len/2)));
+        }
+    }
+    if(!ifeven && cti(s[len/2])!=9)
+        return (s.substr(0,len/2)+itc(cti(s[len/2])+1)+reverse(s.substr(0,len/2)));
+     
+    
+}
+
+
+int main()
+{
+    int t, i;
+    string s;       
+    cin>>t;
+    for(i=0;i<t;i++)
+    {
+        cin>>s;
+        cout<<next_palin(s)<<"\n";
+    }
+    return 0;
+}

@@ -29,19 +29,18 @@ typedef struct linked{
 typedef adjacency_list* ad_list;
 
 
-typedef struct {
+typedef struct _edge{
 	float cost;
 	float x1,y1;
 	float x2,y2;
+	struct _edge *left;
+	struct _edge *right;
 }edge;
 
 hash fillHashTable(int n);
 void populateList(adjacency_list* list,node_pointer hash_table,hash H,int n);               //populates the adjacency list with its neighbours
 adjacency_list* insert_to_list(adjacency_list* list, float x, float y);                     //returns whether element inserted
-//void BFS(ad_list * list, adjacency_list * origin,  int n);
-//void EMST(ad_list * list, int n);
-void kruskal(ad_list * list, int n);
-void bubble_sort(edge *E, int n);
+int find_index(float startx, float starty, ad_list * list, int n);          	//figure out the index of startx, starty in the adjacency_list
 
 int main()
 {
@@ -111,39 +110,9 @@ int main()
 		//cout<<endl;
 	}
 	/************/
-	cout<<"NUmber of edges:"<<c<<endl;
-	kruskal(list, n);
+	cout<<"NUmber of edges:"<< c/2 <<endl;
 	return 0;
 } 
-
-void kruskal(ad_list * list, int n)
-{
-	edge E[1000];
-	adjacency_list *temp;
-	int c=0, i;
-	
-	for(i=0;i<n;i++)
-	{
-		//cout<<"hello";
-		temp = list[i];
-		while(temp!=NULL && temp->next!=NULL && int(temp->next->x)!=-1 && int(temp->next->y)!=-1)
-		{
-			E[c].x1 = list[i]->x;
-			E[c].y1 = list[i]->y;
-			E[c].y2 = temp->next->y;
-			E[c].x2 = temp->next->x;
-			E[c].cost = distance_sq(list[i]->x, list[i]->y, temp->next->x, temp->next->y);
-			c++;
-			temp = temp->next;
-		}
-	}
-	bubble_sort(E, n);
-		
-	
-	
-	
-	
-}
 
 
 int find_index(float startx, float starty, ad_list * list, int n)          	//figure out the index of startx, starty in the adjacency_list
@@ -337,22 +306,3 @@ adjacency_list * insert_to_list(adjacency_list* list, float x, float y)      //r
 }
 
 
-void bubble_sort(edge *E, int n)
-{
-	int i,j;
-	float temp;
-	for(i=0;i<n;i++)
-	{
-		for(j=i+1;j<n;j++)
-		{
-			if(E[i].cost > E[j].cost)
-			{
-				SWAP(E[i].cost, E[j].cost);
-				SWAP(E[i].x1, E[j].x1);
-				SWAP(E[i].x2, E[j].x2);
-				SWAP(E[i].y1, E[j].y1);
-				SWAP(E[i].y2, E[j].y2);
-			}
-		}
-	}
-}

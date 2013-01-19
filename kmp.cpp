@@ -4,7 +4,7 @@ using namespace std;
 
 string int_to_string(int n);
 string kmp(string text, string pattern);
-void failure_array_computation(int failure[], string pattern);
+void failure_array_computation(int *failure, string pattern);
 
 int main()
 {
@@ -49,7 +49,7 @@ string kmp(string text, string pattern)
 	return s;
 }
 
-void failure_array_computation(int failure[], string pattern)
+void failure_array_computation(int *failure, string pattern)
 {
 	int plen = pattern.length();
 	int i=2, j=0;                                      //i related to prefix and j related to suffix
