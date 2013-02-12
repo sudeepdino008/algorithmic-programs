@@ -6,7 +6,7 @@
 #define lld long long int
 #define debug(format, ...) fprintf(stderr, format, ## __VA_ARGS__)
 using namespace std;
-
+//namespace s=std;
 
 int main()
 {
@@ -18,8 +18,11 @@ int main()
 	DAYS days;
 	days=wednesday;
 	cout<<days<<endl;*/
-	int n=2;
+	/*int n=2;
 	cout<<n<<" "<<__builtin_clz(n)<<endl;
-	debug(";wlkl;%d\n",n);
-	return 0;
-}
+	debug(";wlkl;%d\n",n);*/
+	int c;
+	cin>>c;
+	
+	return c;
+	}

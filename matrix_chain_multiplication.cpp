@@ -1,92 +1,69 @@
-//not solved
-
-
-
-
-
 #include <iostream>
-#define MAX_INT 1000000000
+#include <cstdio>
+#define loop(a,s,e) for(a=s;a<=e;a++)
+#define lld long long int
+#define debug(format, ...) fprintf(stderr,format,## __VA_ARGS__)
 using namespace std;
 
-typedef struct matrix{
-	int row;
-	int column;
-}mdimension;
-
-/*void print_paren(int backtrace[][], int i, int j)
+typedef struct m
 {
-	if(i==j)
-		cout<<"i";
-	else
+	int x11,x12,x21,x22;
+}mat;
+
+
+inline int input( )
+{
+    int n=0;
+    int ch=getchar_unlocked();
+    while( ch >= '0' && ch <= '9' )
+    n = (n<<3)+(n<<1) + ch-'0', ch=getchar_unlocked();
+    return n;
+}
+
+
+
+mat multiply(int n)
+{
+	mat m;
+	if(n==0)
 	{
-		cout<<"(";
-		print_paren(backtrace, i, backtrace[i][j]);
-		print_paren(backtrace, backtrace[i][j]+1, j);
-		cout<<")";
+		m.x11=m.x12=m.x21=m.x22=1;
+		return m;
 	}
-	}*/
+	if(n==1)
+	{
+		m.x11=m.x12=2;
+		m.x21=1;m.x22=0;
+		return m;
+	}
+	m=multiply(n/2);
+	mat p;
+	p.x11=m.x11*m.x11+m.x12*m.x21;
+	p.x12=m.x11*m.x12+m.x12*m.x22;
+	p.x21=m.x11*m.x21+m.x21*m.x22;
+	p.x22=m.x12*m.x21+m.x22*m.x22;
+	if(n%2==1)
+	{
+		int r1,r2,r3,r4;
+		r1=2*p.x11+p.x12;
+		r2=2*p.x11;
+		r3=2*p.x21+p.x22;
+		r4=2*p.x21;
+		p.x11=r1;
+		p.x12=r2;
+		p.x21=r3;
+		p.x22=r4;
+	}
+	return p;
+	
+	
+}
 
 
 int main()
 {
-	int n, i, j, k, c, minimum;
-	cout<<"number of matrix: ";
-	cin>>n;
-	mdimension A[n+1];
-	cout<<"enter size and row:\n";
-	
-	for(i=1;i<=n;i++)
-	{
-		cout<<"array "<<i<<" : ";
-		cin>>A[i].row;
-		cin>>A[i].column;
-	}
-	int cost[n+1][n+1], backtrace[n+1][n+1];
-	for(i=1;i<=n;i++)
-	{
-		for(j=1;j<=n;j++)
-			cost[i][j] = backtrace[i][j] = 0;
-	}
-	for(i=n-1;i>=1;i--)
-	{
-		for(j=i+1;j<=n;j++)
-		{
-			minimum = MAX_INT;
-			for(k=i+1;k<=j;k++)
-			{
-				if(k!=j)
-					c = (A[i].row)*(A[k].column)*(A[j].column);
-				else
-					c = (A[i].row)*(A[k].row)*(A[j].column);
-				c+= cost[i][k];
-				if((k+1)<=j)
-					c+=cost[k+1][j];
-				
-				if(minimum>c)
-				{
-					minimum = c;
-					backtrace[i][j] = k;
-				}
-			}
-			cost[i][j]=minimum;
-		}
-	}
-	cout<<cost[1][n]<<endl;
-	for(i=1;i<=n;i++)
-	{
-		for(j=1;j<=n;j++)
-		{
-			cout<<cost[i][j]<<" ";
-		}
-		cout<<endl;
-	}
-	for(i=1;i<=n;i++)
-	{
-		for(j=1;j<=n;j++)
-			cout<<i<<" "<<j<<" : "<<backtrace[i][j]<<endl;
-		cout<<"\n";
-	}
-	//print_paren(backtrace, 1, n);
-	return 0;
-	
+	int n=input();
+	mat matrix=multiply(n);
+	cout<<matrix.x11<<" "<<matrix.x12<<" "<<matrix.x21<<" "<<matrix.x22<<endl<<endl;
+	cout<<3*matrix.x21+matrix.x22<<endl;
 }
