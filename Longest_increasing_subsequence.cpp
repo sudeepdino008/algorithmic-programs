@@ -40,28 +40,38 @@ int longest_increasing_subsequence(vector<int>& v,vector<int>& vs)
   for(i=1;i<=n;i++)
     {
       for(j=1;j<=n;j++)
-	{
-	  //a[i][j]=MAX(MAX(a[i-1][j-1],a[i][j-1]),a[i-1][j]);
-	  a[i][j]=MAX(a[i-1][j],a[i][j-1]);
-	  if(v[j]==vs[i])
-	    a[i][j]++;
-	  if(a[i][j]>max)
-	    {
-	      max=a[i][j];
-	      s.push_back(v[j]);
-	    }
-	      
-	    
-	}
+	  {
+		  //a[i][j]=MAX(MAX(a[i-1][j-1],a[i][j-1]),a[i-1][j]);
+		  a[i][j]=MAX(a[i-1][j],a[i][j-1]);
+		  if(v[j]==vs[i])
+			  a[i][j]=a[i-1][j-1]+1;
+		  if(a[i][j]>max)
+			  max=a[i][j]; 
+	  }
     }
+  i=j=n;
+  while(i>=1 && j>=1)
+  {
+	  if(v[j]==vs[i])
+	  {
+		  s.push_back(v[j]);
+		  i--;
+		  j--;
+	  }
+	  else if(a[i-1][j]>a[i][j-1])
+		  i--;
+	  else
+		  j--;
+  }
   /*for(i=0;i<=n;i++)
     {
       for(j=0;j<=n;j++)
 	cout<<a[i][j]<<" ";
       cout<<endl;
       }*/
-  for(i=0;i<int(s.size());i++)
-    cout<<s[i]<<" ";
+  int len=s.size();
+  for(i=len-1;i>=0;i--)
+	  cout<<s[i]<<" ";
   cout<<endl;
   //cout<<"hello2\n";
   return a[n][n];
