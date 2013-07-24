@@ -1,52 +1,69 @@
-
-// this program uses random pivots, which gives a high probabilty of (nlog n) time complexity
-
 #include <iostream>
-#include<cstdlib>
-#include<ctime>
-#define ARRAY_SIZE 50
-#define SWAP(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
+#include <cstring>
+#include <sstream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <vector>
+#include <set>
+#include <map>
+#include <climits>
+#include <ctime>
+//#define NDEBUG    //when all assert statements have to be disabled
+#include <cassert>
+#define tr(c,i) for(typeof((c).begin()) i = (c).begin(); i != (c).end(); i++) 
+#define present(c,x) ((c).find(x) != (c).end()) 
+#define lld long long int
+#define MOD 1000000007
+#define SIZE 5
 using namespace std;
 
+int array[SIZE];
 
-
-void quicksort(int*, int ,int,int);
+void quick_sort(int start, int end)
+{
+    if(start<end)
+	{
+		int pivot=SIZE%(end-start)+start,p=-1,i;
+		if(start!=pivot)
+			swap(array[start], array[pivot]);
+		bool flag=false;
+		for(i=start+1;i<end;i++)
+		{
+			if(array[i]<=array[start] && p!=-1)
+			{
+                    swap(array[i], array[p++]);
+                    flag=true;
+            }
+			else if(array[i]>array[start] && p==-1)
+			    p=i;
+		}
+		if(p==-1)
+		{
+			swap(array[start], array[end-1]);
+			quick_sort(start+1,end);
+			return ;
+		}
+		if(flag)
+			swap(array[p],array[pivot]);
+		quick_sort(start, p);
+		quick_sort(p+1, end);
+	}
+}
 
 int main()
 {
-    srand(time(0));
-    int i,len;
-    cout<<"enter size of array:\n";
-    cin>>len;
-    int s[len];
-    cout<<"enter array elements:";
-    for(i=0;i<len;i++)cin>>s[i];
-    quicksort(s,0,len,rand()%len);
-    cout<<"sorted:\n";
-    for(i=0;i<len;i++)cout<<s[i]<<"\t";
-    return 0;
-}
-void quicksort(int* s,int small,int large,int pivot){
-    int p=0,i,k1=large;
-    if(small<large){
-        if(small!=pivot)
-            SWAP(s[small],s[pivot]);
-        for(i=small+1;i<large;i++){
-            if(s[i]<s[small]){
-
-                if(p==1){SWAP(s[k1],s[i]);k1++;}
-            }
-            else{
-                    if(p==0)k1=i;
-                    p=1;
-            }
-        }
-        if(small!=(k1-1))     //condition introduced since SWAP function doesn't work for same memory locations
-            SWAP(s[small],s[k1-1]);
-        if(k1>=1 && (k1-1-small)>=1)
-            quicksort(s,small,k1-1,small+rand()%(k1-1-small));
-        if((large-k1)>=1)
-            quicksort(s,k1,large,k1+rand()%(large-k1));
-
-    }
+	srand((unsigned int)(time(NULL)));
+	int i;
+	for(i=0;i<SIZE;i++)
+		array[i]=rand()%100;
+	cout<<"initial array:\n";
+	for(i=0;i<SIZE;i++)
+		cout<<array[i]<<" ";
+	cout<<endl;
+	quick_sort(0,SIZE);
+	cout<<"\n\nsorted array:\n";
+	for(i=0;i<SIZE;i++)
+		cout<<array[i]<<" ";
+	cout<<endl;
 }
