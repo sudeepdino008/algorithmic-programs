@@ -15,7 +15,7 @@
 #define present(c,x) ((c).find(x) != (c).end()) 
 #define lld long long int
 #define MOD 1000000007
-#define SIZE 5
+#define SIZE 10
 using namespace std;
 
 int array[SIZE];
@@ -24,30 +24,25 @@ void quick_sort(int start, int end)
 {
     if(start<end)
 	{
-		int pivot=SIZE%(end-start)+start,p=-1,i;
-		if(start!=pivot)
-			swap(array[start], array[pivot]);
-		bool flag=false;
+		int pivot=SIZE%(end-start)+start;
+		int p=-1,i;
+	  	swap(array[start], array[pivot]);
 		for(i=start+1;i<end;i++)
 		{
 			if(array[i]<=array[start] && p!=-1)
-			{
-                    swap(array[i], array[p++]);
-                    flag=true;
-            }
+				swap(array[i], array[p++]);
 			else if(array[i]>array[start] && p==-1)
 			    p=i;
 		}
 		if(p==-1)
 		{
 			swap(array[start], array[end-1]);
-			quick_sort(start+1,end);
+			quick_sort(start,end-1);
 			return ;
 		}
-		if(flag)
-			swap(array[p],array[pivot]);
-		quick_sort(start, p);
-		quick_sort(p+1, end);
+		swap(array[p-1],array[start]);
+		quick_sort(start, p-1);
+		quick_sort(p, end);
 	}
 }
 
